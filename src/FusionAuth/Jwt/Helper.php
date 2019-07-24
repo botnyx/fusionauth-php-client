@@ -104,7 +104,6 @@ class Helper{
 	
 	
 	public function run(){
-		echo "<pre>";
 		
 		if(property_exists($this,'algs')){
 			
@@ -175,30 +174,17 @@ class Helper{
 		
 		$isVerified = $jwsVerifier->verifyWithKeySet($jws,  $this->key, 0, null, $jwk );
 
-		echo "<h3>Token verified</h3>";
-		var_dump($isVerified);	
-
-		echo "<h3>Payload</h3>";	
-		$claims = json_decode($jws->getPayload(), true);	
-		print_r($claims);
-
-		#print_r($oidcclient->openidConfiguration);
-		//$oidcclient->openidConfiguration->issuer
-		
-		
-		$r = $claimCheckerManager->check($claims, $claimcheck);	
-
-		echo "<h3>verified claims</h3>";
-		print_r($r);	
-
-		
-		
-		
-		if(property_exists($this,'sub')){
-			
+		if(!$isVerified){
+			throw new \Exception("Token not verified");
 		}
 		
+		$this->payload =json_decode($jws->getPayload(), true);
+
 		
+		$r = $claimCheckerManager->check($this->payload, $claimcheck);	
+
+		$this->verifiedClaims = $r;	
+
 		
 		return $this;
 	}
