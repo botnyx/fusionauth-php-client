@@ -1,7 +1,9 @@
 <?php
-namespace FusionAuth;
 
-class JSONBodyHandler implements BodyHandler
+namespace FusionAuth\RestClient;
+
+
+class RAWBodyHandler implements RAWBodyHandlerInterface
 {
   private $body;
 
@@ -10,7 +12,7 @@ class JSONBodyHandler implements BodyHandler
   public function __construct(&$bodyObject)
   {
     $this->bodyObject = $bodyObject;
-    $this->body = json_encode(array_filter($bodyObject));
+    $this->body = http_build_query(array_filter($bodyObject));
   }
 
   public function body()
@@ -25,12 +27,13 @@ class JSONBodyHandler implements BodyHandler
 
   public function setHeaders(&$headers)
   {
-    $headers[] = 'Content-Length: ' . strlen($this->body);
-    $headers[] = 'Content-Type: application/json';
+    //$headers[] = 'Content-Length: ' . strlen($this->body);
+    $headers[] = 'Content-Type: application/x-www-form-urlencoded';
   }
 }
 
-interface BodyHandler
+
+interface RAWBodyHandlerInterface
 {
   /**
    * @return string The body as a string.

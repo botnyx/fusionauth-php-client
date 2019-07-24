@@ -33,12 +33,12 @@ class FusionAuthClient
   /**
    * @var string
    */
-  private $apiKey;
+  protected $apiKey;
 
   /**
    * @var string
    */
-  private $baseURL;
+  protected $baseURL;
 
   /**
    * @var int
@@ -57,6 +57,10 @@ class FusionAuthClient
     $this->baseURL = $baseURL;
   }
 
+  public function withTenantId($tenantId) {
+    $this->tenantId = $tenantId;
+    return $this;
+  }
   /**
    * Takes an action on a user. The user being actioned is called the "actionee" and the user taking the action is called the
    * "actioner". Both user ids are required. You pass the actionee's user id into the method and the actioner's is put into the
@@ -2890,12 +2894,12 @@ class FusionAuthClient
 
   protected function start()
   {
-    $rest = new RESTClient();
+    $rest = new RestClient\RESTClient();
     return $rest->authorization($this->apiKey)
         ->url($this->baseURL)
         ->connectTimeout($this->connectTimeout)
         ->readTimeout($this->readTimeout)
-        ->successResponseHandler(new JSONResponseHandler())
-        ->errorResponseHandler(new JSONResponseHandler());
+        ->successResponseHandler(new RestClient\JSONResponseHandler())
+        ->errorResponseHandler(new RestClient\JSONResponseHandler());
   }
 }

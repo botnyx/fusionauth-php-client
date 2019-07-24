@@ -1,5 +1,5 @@
 <?php
-namespace FusionAuth;
+namespace FusionAuth\RestClient;
 
 /*
  * Copyright (c) 2018, FusionAuth, All Rights Reserved

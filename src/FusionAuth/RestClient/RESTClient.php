@@ -1,5 +1,5 @@
 <?php
-namespace FusionAuth;
+namespace FusionAuth\RestClient;
 
 /*
  * Copyright (c) 2018, FusionAuth, All Rights Reserved
@@ -86,7 +86,6 @@ class RESTClient
 
   public function authorization($key)
   {
-    // Remove any Authorization headers before adding a new one.
     $this->resetAuthorizationHeaders();
 
     // Add the Authorization header.
@@ -97,15 +96,14 @@ class RESTClient
 
   public function basicAuthorization($username, $password)
   {
-    if (!$username && !$password) {
+      //if (!$username && !$password) {
       // Remove any Authorization headers before adding a new one.
       $this->resetAuthorizationHeaders();
-
       // Add the Authorization header.
       $credentials = $username . ':' . $password;
       $encoded = base64_encode($credentials);
       $this->headers[] = 'Authorization: ' . 'Basic ' . $encoded;
-    }
+    //}
 
     return $this;
   }
