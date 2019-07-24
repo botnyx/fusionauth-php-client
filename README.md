@@ -41,3 +41,49 @@ if (!$result->wasSuccessful()) {
 
 // Hooray! Success
 ```
+
+
+
+### Openid-Connect:
+
+```PHP
+$options = array(
+	"openidProvider"=>'Your IDP provider, host -or- absolute-url',
+	"clientId"=>'Capt.Obvious', /* optional, needed for generating login link */
+	"clientSecret"=>'Capt.Obvious', /* optional, needed for generating login link */
+	"redirectUrl"=>'Capt.Obvious' /* optional, needed for generating login link */
+);
+$oidcclient = new FusionAuth\OidcClient( $options);
+
+echo "<a href='".$oidcclient->AuthorizationCodeGrantRequest()."'>Login</a><br>";
+
+
+if( $_GET['code'] && $_GET['state']  ){
+	try {
+		$response = $oidcclient->getTokenFromCode($_GET['code'] );
+	}catch( Exception $e){
+		print_r($e);die();
+	}
+	
+	$jwkset = $oidcclient->jwkset;
+	
+// All options
+$result = $oidcclient->validate($response->access_token)
+		->algs(['RS256', 'RS512']) //
+		->exp() // We check the "exp" claim
+		->iat(1000) // We check the "iat" claim. Leeway is 1000ms (1s)
+		->aud("f7aae31e-63ca-4719-9b3f-8ca942efc942") // Allowed audience
+		->iss(['ISSUED']) // Allowed issuer
+		->key($jwkset) // Key used to verify the signature
+		->run();
+	
+	
+// Less options
+$result = $oidcclient->validate($response->access_token)->aud("f7aae31e-63ca-4719-9b3f-8ca942efc942")->run();
+	
+print_r($result);
+}
+
+
+```
+

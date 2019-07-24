@@ -33,17 +33,12 @@ class FusionAuthClient
   /**
    * @var string
    */
-  private $apiKey;
+  protected $apiKey;
 
   /**
    * @var string
    */
-  private $baseURL;
-
-  /**
-   * @var string
-   */
-  private $tenantId;
+  protected $baseURL;
 
   /**
    * @var int
@@ -57,7 +52,7 @@ class FusionAuthClient
 
   public function __construct($apiKey, $baseURL)
   {
-    include_once 'RESTClient.php';
+    //include_once 'RESTClient.php';
     $this->apiKey = $apiKey;
     $this->baseURL = $baseURL;
   }
@@ -66,7 +61,6 @@ class FusionAuthClient
     $this->tenantId = $tenantId;
     return $this;
   }
-
   /**
    * Takes an action on a user. The user being actioned is called the "actionee" and the user taking the action is called the
    * "actioner". Both user ids are required. You pass the actionee's user id into the method and the actioner's is put into the
@@ -2898,17 +2892,14 @@ class FusionAuthClient
         ->go();
   }
 
-  private function start()
+  protected function start()
   {
-    $rest = new RESTClient();
-    if (isset($tenantId)) {
-      $rest->header("X-FusionAuth-TenantId", $tenantId);
-    }
+    $rest = new RestClient\RESTClient();
     return $rest->authorization($this->apiKey)
         ->url($this->baseURL)
         ->connectTimeout($this->connectTimeout)
         ->readTimeout($this->readTimeout)
-        ->successResponseHandler(new JSONResponseHandler())
-        ->errorResponseHandler(new JSONResponseHandler());
+        ->successResponseHandler(new RestClient\JSONResponseHandler())
+        ->errorResponseHandler(new RestClient\JSONResponseHandler());
   }
 }
