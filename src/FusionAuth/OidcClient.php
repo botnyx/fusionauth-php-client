@@ -66,50 +66,31 @@ class OidcClient
 	  }
 	  
 	  
-/*		
-	,$clientId,$clientSecret,$baseURL,$redirectUri
-	$this->clientId = $clientId;
-	$this->clientSecret = $clientSecret;
-	$this->redirectUri = $redirectUri;
-    $this->baseURL = $baseURL;
-*/	
   }
   public function validate($token){
-	  
 	  return new Jwt\Helper($token,$this->jwkset,$this->openidConfiguration);
-	  //return Jwt\Validate::token($token,);
   }
-  // Implicit Grant Request	
-  public function AuthorizationCodeGrantRequest(array $extrascopes = array()){
+  // AuthorizationCode Grant Request	
+  public function AuthorizationCodeGrantRequest($state="", array $extrascopes = array()){
 	  
-	  $scopes = array_merge( $extrascopes,array("code"));
+	  if($state==""){
+		  $state = time();
+	  }
+	  
+	  $scopes = array_merge( $extrascopes,array("openid"));
 	  $option = array(
 		  "client_id"=>$this->clientId,
 		  "redirect_uri"=>$this->redirectUri,
 		  "nonce"=>1,
-		  "state"=>time(),
-		  "response_type"=>implode(" ",$scopes),
-		  "scope"=>"openid"
+		  "state"=>$state,
+		  "response_type"=>"code",
+		  "scope"=>implode(" ",$scopes)
 	  );
 	  
 	  return $this->openidConfiguration->authorization_endpoint."?".http_build_query($option);
   }	
 	
-  // Authorization Code Grant Request	
-  public function ImplicitGrantRequest(array $extrascopes = array()){
-	  
-	  $scopes = array_merge( $extrascopes,array("token","id_token"));
-	  $option = array(
-		  "client_id"=>$this->clientId,
-		  "redirect_uri"=>$this->redirectUri,
-		  "nonce"=>1,
-		  "state"=>time(),
-		  "response_type"=>implode(" ",$scopes),
-		  "scope"=>"openid"
-	  );
-	  
-	  return $this->openidConfiguration->authorization_endpoint."?".http_build_query($option);
-  }
+
   
   public function setClientId($clientId){
 	  $this->clientId = $clientId;
@@ -147,7 +128,7 @@ class OidcClient
 	  
 	  $urlParts = parse_url($openIdDiscoveryUrl);
 	  if( strtolower($urlParts['scheme'])!="https" ){
-		  throw new \Exception("No HTTPS!");
+		  throw new OpenIdConnect\InsecureConnectionException("Discovery not secure.");
 	  }
 	  if(!array_key_exists('path',$urlParts)){
 		 // only domain. 
@@ -213,7 +194,7 @@ class OidcClient
 
 	  $req =  $this->getJWKS($jwks_uri);
 	  if($req->status!=200){
-		  throw new \Exception($req->errorResponse);
+		  throw new OpenIdConnect\JsonWebKeySetException($req->errorResponse);
 	  }
 	  
 	  $this->jwks =  (array)$req->successResponse; 
@@ -269,9 +250,7 @@ class OidcClient
 		->go();
 	  
 	  if($req->status!=200){
-		  print_r($req);
-		  die();
-		  throw new \Exception($req->errorResponse->error_description);
+		  throw new OpenIdConnect\AuthorizationCodeException($req->errorResponse->error_description);
 	  }
 	  return $req->successResponse; 
   }
