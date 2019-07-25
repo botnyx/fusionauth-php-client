@@ -96,15 +96,13 @@ class RESTClient
 
   public function basicAuthorization($username, $password)
   {
-      //if (!$username && !$password) {
       // Remove any Authorization headers before adding a new one.
       $this->resetAuthorizationHeaders();
       // Add the Authorization header.
       $credentials = $username . ':' . $password;
       $encoded = base64_encode($credentials);
       $this->headers[] = 'Authorization: ' . 'Basic ' . $encoded;
-    //}
-
+    
     return $this;
   }
 

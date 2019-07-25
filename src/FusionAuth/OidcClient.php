@@ -67,16 +67,27 @@ class OidcClient
 	  
 	  
   }
+  
   public function validate($token){
 	  return new Jwt\Helper($token,$this->jwkset,$this->openidConfiguration);
   }
-  // AuthorizationCode Grant Request	
+	
+	
+  	
+  /**
+   * AuthorizationCode Grant Request
+   * Attempts to get create a url for the AuthorizationCode grant.
+   *
+   * @return String The Response.
+   * @throws \Exception
+   */
   public function AuthorizationCodeGrantRequest($state="", array $extrascopes = array()){
 	  
+	  // if the state isnt specificly set, we set a timestamp.
 	  if($state==""){
 		  $state = time();
 	  }
-	  
+	  // add extra scopes, if they are provided.
 	  $scopes = array_merge( $extrascopes,array("openid"));
 	  $option = array(
 		  "client_id"=>$this->clientId,
@@ -237,7 +248,6 @@ class OidcClient
 	  );
 	  
 	  $rest = new RestClient\RESTClient();
-
 	  
       $req =  $rest->basicAuthorization($this->clientId,$this->clientSecret)
         ->url($this->openidConfiguration->token_endpoint)

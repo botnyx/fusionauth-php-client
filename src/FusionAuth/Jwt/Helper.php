@@ -1,13 +1,24 @@
 <?php
-
 namespace FusionAuth\Jwt;
 
 
 use Jose\Component\Core\JWK;
+use Jose\Component\Core\JWKSet;
+use Jose\Component\Core\AlgorithmManager;
+
+
+use Jose\Component\Checker;
+use Jose\Component\Checker\HeaderCheckerManager;
+use Jose\Component\Checker\AlgorithmChecker;
+use Jose\Component\Checker\ClaimCheckerManager;
+
+
+use Jose\Component\Signature\JWSTokenSupport;
+
 use Jose\Component\Signature\Serializer\JWSSerializerManager;
 use Jose\Component\Signature\Serializer\CompactSerializer;
 
-use Jose\Component\Core\AlgorithmManager;
+use Jose\Component\Signature\JWSVerifier;
 use Jose\Component\Signature\Algorithm\HS256;
 use Jose\Component\Signature\Algorithm\HS384;
 use Jose\Component\Signature\Algorithm\HS512;
@@ -20,11 +31,8 @@ use Jose\Component\Signature\Algorithm\ES256;
 use Jose\Component\Signature\Algorithm\ES384;
 use Jose\Component\Signature\Algorithm\ES512;
 
-use Jose\Component\Signature\JWSVerifier;
-use Jose\Component\Core\JWKSet;
 
-use Jose\Component\Checker\ClaimCheckerManager;
-use Jose\Component\Checker;
+
 
 
 
@@ -105,6 +113,8 @@ class Helper{
 	
 	public function run(){
 		
+		
+		// Algorithms
 		if(property_exists($this,'algs')){
 			
 			$algorythms=array();
@@ -121,6 +131,19 @@ class Helper{
 		}
 		
 		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
 		$claimchecks = array();
 		if(property_exists($this,'iat')){
 			if(is_bool($this->iat)){
@@ -131,6 +154,7 @@ class Helper{
 			$claimcheck[]='iat';
 			
 		}
+		
 		if(property_exists($this,'exp')){
 			if(is_bool($this->exp)){
 				$claimchecks[] =  new Checker\ExpirationTimeChecker();
@@ -140,11 +164,15 @@ class Helper{
 			
 			$claimcheck[]='exp';
 		}
+		
+		
 		if(property_exists($this,'aud')){
 			$claimchecks[] = new Checker\AudienceChecker($this->aud);
 			
 			$claimcheck[]='aud';
 		}
+		
+		
 		if(property_exists($this,'iss')){
 			
 			if(is_string($this->iss)){
@@ -157,9 +185,6 @@ class Helper{
 		}
 		
 		
-		if(property_exists($this,'key')){
-			
-		}
 
 		$claimCheckerManager = new ClaimCheckerManager($claimchecks);
 		
@@ -172,10 +197,35 @@ class Helper{
 		$jws = $serializerManager->unserialize($this->token);
 		
 		
-		$isVerified = $jwsVerifier->verifyWithKeySet($jws,  $this->key, 0, null, $jwk );
+		// First Pass, Header Validation-check.
+		$headerCheckerManager = new HeaderCheckerManager(
+			[
+				new AlgorithmChecker($this->algs), // We check the header "alg" (algorithm)
+			],
+			[
+				new JWSTokenSupport(), // Adds JWS token type support
+			]
+		);
+		//$headerCheckerManager->check($jws, 0);
+		// check if alg,typ,kid are in the tokenheader.
+		try{
+			$headerCheckerManager->check($jws, 0, ['alg', 'typ', 'kid']);
+		}catch(\Exception $e){
+			throw new OpenIdConnect\InvalidTokenHeaderException($e->getMessage());
+		}
+		
+		
+		// Second Pass, Token Validation-check.
+		// verifyWithKeySet(JWS $jws, JWKSet $jwkset, int $signatureIndex, ?string $detachedPayload = null, JWK &$jwk = null)
+        // 
+		// See: https://github.com/web-token/jwt-framework/blob/f6e8cb0b6cfa80727ac9dc9de048d366314c1bfe/src/Bundle/JoseFramework/Services/JWSVerifier.php
+		// 
+		
+		$isVerified = $jwsVerifier->verifyWithKeySet($jws,  $this->key, 0 );
 
+		
 		if(!$isVerified){
-			throw new \Exception("Token not verified");
+			throw new OpenIdConnect\InvalidTokenException("Token not verified");
 		}
 		
 		$this->payload =json_decode($jws->getPayload(), true);

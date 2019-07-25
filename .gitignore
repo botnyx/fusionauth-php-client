@@ -5,7 +5,7 @@ build/
 package-lock.json
 /vendor
 /composer.lock
-# DW Dreamweaver added files
+_notes/
 _notes
 _compareTemp
 configs/
@@ -13,3 +13,8 @@ dwsync.xml
 dw_php_codehinting.config
 *.mno
 src/FusionAuth/OpenIdConnect/_notes/dwsync.xml
+src/FusionAuth/Jwt/_notes/dwsync.xml
+src/FusionAuth/RestClient/_notes/dwsync.xml
+src/FusionAuth/Jwt/_notes/dwsync.xml
+src/FusionAuth/RestClient/_notes/dwsync.xml
+*.xml
