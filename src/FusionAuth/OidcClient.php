@@ -35,13 +35,16 @@ class OidcClient
    * @var mixed
    */
   public $openidConfiguration = false;
-  
+  /**
+   * @var int
+   */
+  public $cacheLifeTime  = 2000;
 
 
 	
   public function __construct(array $options)
   {
-  	  $this->cache = new OpenIdConnect\Cache(); 
+  	  $this->cache = new OpenIdConnect\Cache($this->cacheLifeTime); 
 	  
 	  
 	  
