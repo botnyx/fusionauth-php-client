@@ -92,7 +92,6 @@ class OidcClient
 	  $option = array(
 		  "client_id"=>$this->clientId,
 		  "redirect_uri"=>$this->redirectUri,
-		  "nonce"=>1,
 		  "state"=>$state,
 		  "response_type"=>"code",
 		  "scope"=>implode(" ",$scopes)
@@ -153,8 +152,11 @@ class OidcClient
 	  if($req->status!=200){
 		  throw new OpenIdConnect\AutoDiscoveryException("Server returned status ".$req->status);
 	  }
-	  $this->openidConfiguration =  $req->successResponse;  
 	  
+	  
+	  
+	  $this->openidConfiguration =  $req->successResponse;  
+	  $this->cache->set($idp_provider,json_encode($req->successResponse));
 	  
 	  $this->jwks($this->openidConfiguration->jwks_uri);
 	  
