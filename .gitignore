@@ -12,3 +12,4 @@ configs/
 dwsync.xml
 dw_php_codehinting.config
 *.mno
+src/FusionAuth/OpenIdConnect/_notes/dwsync.xml
