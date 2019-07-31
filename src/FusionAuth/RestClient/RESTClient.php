@@ -228,6 +228,7 @@ class RESTClient
         curl_setopt($curl, CURLOPT_POSTFIELDS, $this->bodyHandler->body());
       }
 
+		
       $result = curl_exec($curl);
 
       $response->status = curl_getinfo($curl, CURLINFO_HTTP_CODE);

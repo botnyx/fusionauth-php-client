@@ -71,7 +71,24 @@ class OidcClient
 	  
   }
   
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+  public function userInfo($token){
+	  
+	  return $this->getUserinfo($token)->successResponse;
+  }	
+	
   public function validate($token){
+	  $this->apiKey = $token;
 	  return new Jwt\Helper($token,$this->jwkset,$this->openidConfiguration);
   }
 	
@@ -241,7 +258,10 @@ class OidcClient
 		->go();
   }
 	
-	
+  private function getUserinfo($token){
+	$rest = new RestClient\RESTClient();
+	return $this->get($this->openidConfiguration->userinfo_endpoint);
+  }	
 	
 	
   public function getTokenFromCode($code){
@@ -272,12 +292,36 @@ class OidcClient
 	
 
 	
-  
-	
+  function get($url){
+	  return $this->tokenAuth()
+		->url($url)
+		->get()
+		->go();
+  }
+  function post(array $request){
+	  return $this->tokenAuth()
+		->url($url)
+		->bodyHandler(new RestClient\JSONBodyHandler($request))
+		->post()
+		->go();
+  }
+  function put(array $request){
+	  return $this->tokenAuth()
+		->url($url)
+		->bodyHandler(new RestClient\JSONBodyHandler($request))
+		->put()
+		->go();
+  }
+  function delete(){
+	  return $this->tokenAuth()
+		->url($url)
+		->delete()
+		->go(); 
+  }
   protected function tokenAuth()
   {
     $rest = new RestClient\RESTClient();
-    return $rest->authorization($this->apiKey)
+    return $rest->authorization('Bearer '.$this->apiKey)
         ->url($this->baseURL)
         ->connectTimeout($this->connectTimeout)
         ->readTimeout($this->readTimeout)
